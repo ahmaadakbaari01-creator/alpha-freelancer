@@ -1,0 +1,5 @@
+# Screenshot previews (not needed in repo)
+*.png
+preview-*.html
+admin-preview.html
+admin-sec-*.html
