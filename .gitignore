@@ -1,3 +1,16 @@
+# Dependencies
+node_modules/
+
+# Environment
+.env
+.env.local
+
+# Data (contacts will be recreated on server)
+backend/data/contacts.json
+
+# Claude session
+.claude/
+
 # Screenshot previews (not needed in repo)
 *.png
 preview-*.html

@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Alpha — Admin Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#030307;--bg2:#08080f;--card:rgba(255,255,255,.04);
+  --border:rgba(255,255,255,.08);--fg:#eeeef2;--muted:#7a7f8e;
+  --purple:#7c3aed;--cyan:#00d4ff;--green:#34d399;--red:#f43f5e;--gold:#f59e0b;
+  --r:12px;--font:'Vazirmatn',sans-serif;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);min-height:100vh;display:flex;flex-direction:column;}
+
+/* ── LOGIN ── */
+#loginScreen{
+  display:flex;align-items:center;justify-content:center;
+  min-height:100vh;padding:24px;
+}
+.login-box{
+  width:100%;max-width:400px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:20px;padding:40px;
+  backdrop-filter:blur(16px);
+}
+.login-logo{
+  display:flex;align-items:center;gap:10px;justify-content:center;
+  margin-bottom:32px;
+}
+.login-logo .lm{
+  width:40px;height:40px;border-radius:11px;
+  background:linear-gradient(135deg,var(--purple),#0891b2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;font-weight:900;color:#fff;
+  box-shadow:0 0 20px rgba(124,58,237,.4);
+}
+.login-logo span{font-size:22px;font-weight:800;}
+.login-box h2{text-align:center;font-size:18px;font-weight:700;color:var(--fg);margin-bottom:6px;}
+.login-box p{text-align:center;font-size:13px;color:var(--muted);margin-bottom:28px;}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
+.field label{font-size:13px;font-weight:600;}
+.field input{
+  background:rgba(255,255,255,.05);border:1px solid var(--border);
+  border-radius:var(--r);padding:11px 14px;color:var(--fg);
+  font-family:var(--font);font-size:14px;outline:none;
+  transition:border-color .25s;
+}
+.field input:focus{border-color:rgba(124,58,237,.6);box-shadow:0 0 0 3px rgba(124,58,237,.1);}
+.login-btn{
+  width:100%;padding:13px;border-radius:100px;
+  background:linear-gradient(135deg,var(--purple),#0891b2);
+  color:#fff;font-size:15px;font-weight:700;cursor:pointer;
+  box-shadow:0 0 24px rgba(124,58,237,.38);
+  transition:transform .25s,box-shadow .25s;border:none;
+  margin-top:8px;
+}
+.login-btn:hover{transform:translateY(-2px);box-shadow:0 6px 32px rgba(124,58,237,.45);}
+.login-err{
+  margin-top:12px;padding:10px 14px;border-radius:var(--r);
+  background:rgba(244,63,94,.1);border:1px solid rgba(244,63,94,.3);
+  color:var(--red);font-size:13px;text-align:center;display:none;
+}
+
+/* ── APP SHELL ── */
+#appShell{display:none;flex:1;flex-direction:column;}
+
+/* Sidebar */
+.layout{display:flex;flex:1;}
+.sidebar{
+  width:240px;flex-shrink:0;
+  background:var(--bg2);
+  border-left:1px solid var(--border);
+  display:flex;flex-direction:column;
+  padding:24px 16px;gap:4px;
+}
+.sidebar-logo{
+  display:flex;align-items:center;gap:9px;
+  padding:4px 8px 20px;border-bottom:1px solid var(--border);margin-bottom:12px;
+}
+.sidebar-logo .lm{
+  width:30px;height:30px;border-radius:8px;font-size:16px;font-weight:900;color:#fff;
+  background:linear-gradient(135deg,var(--purple),#0891b2);
+  display:flex;align-items:center;justify-content:center;
+}
+.sidebar-logo span{font-size:15px;font-weight:800;}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;border-radius:var(--r);
+  font-size:14px;font-weight:500;color:var(--muted);
+  cursor:pointer;transition:all .2s;border:none;background:none;
+  width:100%;text-align:right;
+}
+.nav-item:hover{background:rgba(255,255,255,.04);color:var(--fg);}
+.nav-item.active{background:rgba(124,58,237,.12);color:var(--purple);font-weight:700;}
+.nav-item svg{flex-shrink:0;opacity:.7;}
+.nav-item.active svg{opacity:1;}
+.sidebar-footer{margin-top:auto;border-top:1px solid var(--border);padding-top:16px;}
+.logout-btn{
+  display:flex;align-items:center;gap:8px;
+  padding:9px 12px;border-radius:var(--r);
+  font-size:13px;font-weight:600;color:var(--red);
+  cursor:pointer;transition:background .2s;width:100%;
+  border:none;background:none;
+}
+.logout-btn:hover{background:rgba(244,63,94,.08);}
+
+/* Content */
+.content{flex:1;padding:32px;overflow-y:auto;}
+.page{display:none;}
+.page.active{display:block;}
+
+/* Header bar */
+.page-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:28px;flex-wrap:wrap;gap:16px;
+}
+.page-title{font-size:22px;font-weight:800;color:#fff;}
+.unread-badge{
+  padding:4px 12px;border-radius:100px;
+  background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.3);
+  font-size:12px;font-weight:700;color:var(--purple);
+}
+
+/* Stat cards */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px;}
+.stat-card{
+  padding:22px 20px;border-radius:var(--r);
+  background:var(--card);border:1px solid var(--border);
+}
+.stat-card .sc-label{font-size:12px;color:var(--muted);margin-bottom:8px;}
+.stat-card .sc-val{font-size:28px;font-weight:800;color:#fff;}
+.stat-card .sc-accent{color:var(--cyan);}
+
+/* Messages table */
+.msg-filters{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
+.filter-btn{
+  padding:7px 16px;border-radius:100px;
+  border:1px solid var(--border);background:var(--card);
+  font-size:12px;font-weight:600;color:var(--muted);
+  cursor:pointer;transition:all .2s;
+}
+.filter-btn.active{border-color:rgba(124,58,237,.5);background:rgba(124,58,237,.1);color:var(--purple);}
+
+.msg-list{display:flex;flex-direction:column;gap:10px;}
+.msg-card{
+  padding:20px 22px;border-radius:var(--r);
+  background:var(--card);border:1px solid var(--border);
+  transition:border-color .25s,background .25s;
+  position:relative;
+}
+.msg-card:hover{border-color:rgba(124,58,237,.3);background:rgba(124,58,237,.03);}
+.msg-card.unread{border-right:3px solid var(--purple);}
+.msg-card.unread .msg-name{color:#fff;}
+.msg-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px;}
+.msg-meta{display:flex;flex-direction:column;gap:3px;}
+.msg-name{font-size:15px;font-weight:700;color:var(--fg);}
+.msg-email{font-size:12px;color:var(--muted);}
+.msg-date{font-size:11px;color:var(--muted);flex-shrink:0;}
+.msg-tags{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;}
+.msg-tag{
+  padding:2px 9px;border-radius:100px;
+  font-size:10px;font-weight:600;letter-spacing:.06em;
+  border:1px solid var(--border);color:var(--muted2);
+}
+.msg-body{font-size:14px;color:var(--muted);line-height:1.75;margin-bottom:14px;}
+.msg-actions{display:flex;gap:8px;justify-content:flex-end;}
+.action-btn{
+  padding:6px 14px;border-radius:100px;
+  font-size:12px;font-weight:600;cursor:pointer;
+  border:1px solid var(--border);background:var(--card);color:var(--muted);
+  transition:all .2s;
+}
+.action-btn:hover{color:var(--fg);border-color:rgba(255,255,255,.2);}
+.action-btn.read-btn:hover{border-color:rgba(52,211,153,.4);color:var(--green);}
+.action-btn.del-btn:hover{border-color:rgba(244,63,94,.4);color:var(--red);}
+
+/* Projects page */
+.proj-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.proj-card{
+  padding:22px;border-radius:var(--r);
+  background:var(--card);border:1px solid var(--border);
+  position:relative;overflow:hidden;
+}
+.proj-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--purple),var(--cyan));
+}
+.proj-card h3{font-size:16px;font-weight:700;color:#fff;margin-bottom:6px;}
+.proj-cat{font-size:11px;color:var(--muted);margin-bottom:10px;}
+.proj-tech{display:flex;flex-wrap:wrap;gap:5px;}
+.proj-pill{
+  padding:2px 8px;border-radius:100px;
+  font-size:10px;font-weight:600;
+  border:1px solid var(--border);color:var(--muted);
+  font-family:'Space Grotesk',sans-serif;
+}
+
+/* Empty state */
+.empty{
+  text-align:center;padding:60px 24px;
+  color:var(--muted);font-size:15px;
+}
+.empty svg{margin:0 auto 16px;opacity:.3;}
+
+/* Loading spinner */
+.spinner{
+  display:inline-block;width:20px;height:20px;border-radius:50%;
+  border:2px solid rgba(124,58,237,.2);
+  border-top-color:var(--purple);
+  animation:spin .7s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Toast */
+.toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  padding:12px 24px;border-radius:100px;
+  font-size:14px;font-weight:600;color:#fff;
+  background:rgba(20,18,40,.95);border:1px solid var(--border);
+  backdrop-filter:blur(16px);
+  animation:toastIn .3s ease;
+  z-index:9999;
+}
+@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+
+@media(max-width:900px){
+  .stats-row{grid-template-columns:repeat(2,1fr);}
+  .proj-grid{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:600px){
+  .sidebar{display:none;}
+  .content{padding:20px;}
+  .stats-row{grid-template-columns:1fr 1fr;}
+  .proj-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="lm">α</div>
+      <span>Alpha Admin</span>
+    </div>
+    <h2>ورود به پنل مدیریت</h2>
+    <p>کلید ادمین را وارد کنید</p>
+    <div class="field">
+      <label for="adminKey">کلید ادمین</label>
+      <input type="password" id="adminKey" placeholder="••••••••••••••••" autocomplete="current-password"/>
+    </div>
+    <button class="login-btn" id="loginBtn">ورود ←</button>
+    <div class="login-err" id="loginErr">کلید ادمین اشتباه است.</div>
+  </div>
+</div>
+
+<!-- ══ APP SHELL ══ -->
+<div id="appShell">
+  <div class="layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <div class="lm">α</div>
+        <span>Alpha Admin</span>
+      </div>
+
+      <button class="nav-item active" data-page="dashboard">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        داشبورد
+      </button>
+
+      <button class="nav-item" data-page="messages">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        پیام‌ها
+        <span id="navBadge" style="margin-right:auto;background:rgba(124,58,237,.2);color:#9d5ff5;padding:2px 8px;border-radius:100px;font-size:11px;font-weight:700"></span>
+      </button>
+
+      <button class="nav-item" data-page="projects">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        پروژه‌ها
+      </button>
+
+      <div class="sidebar-footer">
+        <a href="/" class="nav-item" style="text-decoration:none">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          بازگشت به سایت
+        </a>
+        <button class="logout-btn" id="logoutBtn">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          خروج
+        </button>
+      </div>
+    </aside>
+
+    <!-- Content -->
+    <main class="content">
+
+      <!-- ── DASHBOARD ── -->
+      <div class="page active" id="page-dashboard">
+        <div class="page-header">
+          <h1 class="page-title">داشبورد</h1>
+          <span id="lastRefresh" style="font-size:12px;color:var(--muted)"></span>
+        </div>
+        <div class="stats-row" id="statsRow">
+          <div class="stat-card"><div class="sc-label">کل پیام‌ها</div><div class="sc-val sc-accent" id="s-total">—</div></div>
+          <div class="stat-card"><div class="sc-label">پیام‌های خوانده‌نشده</div><div class="sc-val" id="s-unread" style="color:var(--purple)">—</div></div>
+          <div class="stat-card"><div class="sc-label">پروژه‌ها</div><div class="sc-val" id="s-proj">—</div></div>
+          <div class="stat-card"><div class="sc-label">رضایت مشتری</div><div class="sc-val" style="color:var(--green)" id="s-sat">—</div></div>
+        </div>
+        <!-- Recent messages preview -->
+        <h2 style="font-size:16px;font-weight:700;color:#fff;margin-bottom:16px">آخرین پیام‌ها</h2>
+        <div id="recentMsgs"><div class="spinner"></div></div>
+      </div>
+
+      <!-- ── MESSAGES ── -->
+      <div class="page" id="page-messages">
+        <div class="page-header">
+          <h1 class="page-title">پیام‌ها</h1>
+          <span class="unread-badge" id="unreadBadge">۰ خوانده‌نشده</span>
+        </div>
+        <div class="msg-filters">
+          <button class="filter-btn active" data-filter="all">همه</button>
+          <button class="filter-btn" data-filter="unread">خوانده‌نشده</button>
+          <button class="filter-btn" data-filter="read">خوانده‌شده</button>
+        </div>
+        <div class="msg-list" id="msgList"><div class="spinner"></div></div>
+      </div>
+
+      <!-- ── PROJECTS ── -->
+      <div class="page" id="page-projects">
+        <div class="page-header">
+          <h1 class="page-title">پروژه‌ها</h1>
+        </div>
+        <div class="proj-grid" id="projGrid"><div class="spinner"></div></div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<script>
+/* ── State ── */
+let adminKey = '';
+let contacts = [];
+let msgFilter = 'all';
+
+/* ── Login ── */
+document.getElementById('adminKey').addEventListener('keydown', e => { if(e.key==='Enter') login(); });
+document.getElementById('loginBtn').addEventListener('click', login);
+
+async function login(){
+  const key = document.getElementById('adminKey').value.trim();
+  if(!key) return;
+  try {
+    const r = await fetch('/api/admin/contacts', { headers:{'x-admin-key':key} });
+    if(!r.ok) throw new Error();
+    adminKey = key;
+    sessionStorage.setItem('alpha-admin-key', key);
+    showApp();
+  } catch {
+    document.getElementById('loginErr').style.display='block';
+  }
+}
+
+async function tryAutoLogin(){
+  const k = sessionStorage.getItem('alpha-admin-key');
+  if(!k) return;
+  try {
+    const r = await fetch('/api/admin/contacts',{headers:{'x-admin-key':k}});
+    if(r.ok){ adminKey=k; showApp(); }
+  } catch {}
+}
+
+function showApp(){
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('appShell').style.display='flex';
+  loadAll();
+}
+
+document.getElementById('logoutBtn').addEventListener('click', ()=>{
+  sessionStorage.removeItem('alpha-admin-key');
+  location.reload();
+});
+
+/* ── Navigation ── */
+document.querySelectorAll('[data-page]').forEach(btn=>{
+  btn.addEventListener('click', ()=> switchPage(btn.dataset.page));
+});
+
+function switchPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('[data-page]').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.querySelector(`[data-page="${name}"]`).classList.add('active');
+  if(name==='messages') renderMsgs();
+  if(name==='projects')  loadProjects();
+}
+
+/* ── Load all data ── */
+async function loadAll(){
+  await Promise.all([loadContacts(), loadStats(), loadProjects()]);
+  document.getElementById('lastRefresh').textContent = 'آخرین بروزرسانی: ' + new Date().toLocaleTimeString('fa-IR');
+}
+
+async function loadContacts(){
+  try {
+    const r = await fetch('/api/admin/contacts',{headers:{'x-admin-key':adminKey}});
+    const j = await r.json();
+    contacts = j.contacts || [];
+    updateBadges();
+    renderMsgs();
+    renderRecent();
+  } catch {}
+}
+
+async function loadStats(){
+  try {
+    const [sr, cr] = await Promise.all([
+      fetch('/api/stats').then(r=>r.json()),
+      fetch('/api/admin/contacts',{headers:{'x-admin-key':adminKey}}).then(r=>r.json()),
+    ]);
+    document.getElementById('s-total').textContent  = (cr.contacts||[]).length;
+    document.getElementById('s-unread').textContent = (cr.contacts||[]).filter(c=>!c.read).length;
+    document.getElementById('s-proj').textContent   = sr.stats?.projects ?? '—';
+    document.getElementById('s-sat').textContent    = (sr.stats?.satisfaction ?? '—') + '%';
+  } catch {}
+}
+
+async function loadProjects(){
+  try {
+    const r = await fetch('/api/projects');
+    const j = await r.json();
+    const grid = document.getElementById('projGrid');
+    if(!j.projects?.length){ grid.innerHTML='<div class="empty">بدون پروژه</div>'; return; }
+    grid.innerHTML = j.projects.map(p=>`
+      <div class="proj-card">
+        <h3>${p.title.fa}</h3>
+        <div class="proj-cat">${p.category}${p.featured?' — Featured':''}</div>
+        <div class="proj-tech">${(p.tech||[]).map(t=>`<span class="proj-pill">${t}</span>`).join('')}</div>
+      </div>
+    `).join('');
+  } catch {}
+}
+
+/* ── Badges ── */
+function updateBadges(){
+  const unread = contacts.filter(c=>!c.read).length;
+  const badge  = document.getElementById('navBadge');
+  const ubadge = document.getElementById('unreadBadge');
+  badge.textContent  = unread || '';
+  ubadge.textContent = unread + ' خوانده‌نشده';
+  document.getElementById('s-total').textContent  = contacts.length;
+  document.getElementById('s-unread').textContent = unread;
+}
+
+/* ── Render messages ── */
+function renderMsgs(){
+  const list = document.getElementById('msgList');
+  let filtered = contacts;
+  if(msgFilter==='unread') filtered = contacts.filter(c=>!c.read);
+  if(msgFilter==='read')   filtered = contacts.filter(c=>c.read);
+  if(!filtered.length){
+    list.innerHTML='<div class="empty"><svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>بدون پیام</div>';
+    return;
+  }
+  list.innerHTML = filtered.map(c=>`
+    <div class="msg-card ${c.read?'':'unread'}" data-id="${c.id}">
+      <div class="msg-header">
+        <div class="msg-meta">
+          <div class="msg-name">${esc(c.name)} ${c.read?'':'<span style="color:var(--purple);font-size:10px;margin-right:6px">● جدید</span>'}</div>
+          <div class="msg-email">${esc(c.email)}</div>
+        </div>
+        <div class="msg-date">${fmtDate(c.date)}</div>
+      </div>
+      <div class="msg-tags">
+        ${c.service&&c.service!=='—'?`<span class="msg-tag">${esc(c.service)}</span>`:''}
+        ${c.budget&&c.budget!=='—'?`<span class="msg-tag">${esc(c.budget)}</span>`:''}
+      </div>
+      <div class="msg-body">${esc(c.message)}</div>
+      <div class="msg-actions">
+        ${!c.read?`<button class="action-btn read-btn" onclick="markRead(${c.id})">✓ خواندم</button>`:''}
+        <button class="action-btn" onclick="copyEmail('${esc(c.email)}')">کپی ایمیل</button>
+        <button class="action-btn del-btn" onclick="deleteMsg(${c.id})">حذف</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderRecent(){
+  const el = document.getElementById('recentMsgs');
+  const recent = contacts.slice(0,3);
+  if(!recent.length){ el.innerHTML='<div class="empty">بدون پیام</div>'; return; }
+  el.innerHTML = recent.map(c=>`
+    <div class="msg-card ${c.read?'':'unread'}" style="cursor:default">
+      <div class="msg-header">
+        <div class="msg-meta">
+          <div class="msg-name">${esc(c.name)}</div>
+          <div class="msg-email">${esc(c.email)}</div>
+        </div>
+        <div class="msg-date">${fmtDate(c.date)}</div>
+      </div>
+      <div class="msg-body" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(c.message)}</div>
+    </div>
+  `).join('');
+}
+
+/* ── Actions ── */
+async function markRead(id){
+  await fetch(`/api/admin/contacts/${id}/read`,{method:'PATCH',headers:{'x-admin-key':adminKey}});
+  const c=contacts.find(x=>x.id===id); if(c) c.read=true;
+  updateBadges(); renderMsgs(); renderRecent();
+  toast('پیام به عنوان خوانده‌شده علامت‌گذاری شد ✓');
+}
+
+async function deleteMsg(id){
+  if(!confirm('آیا مطمئن هستید؟')) return;
+  await fetch(`/api/admin/contacts/${id}`,{method:'DELETE',headers:{'x-admin-key':adminKey}});
+  contacts=contacts.filter(x=>x.id!==id);
+  updateBadges(); renderMsgs(); renderRecent();
+  toast('پیام حذف شد.');
+}
+
+function copyEmail(email){
+  navigator.clipboard?.writeText(email);
+  toast('ایمیل کپی شد: ' + email);
+}
+
+/* ── Filters ── */
+document.querySelectorAll('.filter-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    msgFilter=btn.dataset.filter;
+    renderMsgs();
+  });
+});
+
+/* ── Helpers ── */
+function esc(s){ const d=document.createElement('div');d.textContent=s||'';return d.innerHTML; }
+function fmtDate(iso){ return new Date(iso).toLocaleDateString('fa-IR',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}); }
+function toast(msg){
+  const t=document.createElement('div');
+  t.className='toast'; t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),3200);
+}
+
+/* ── Auto-login on load ── */
+tryAutoLogin();
+</script>
+</body>
+</html>
